@@ -1,0 +1,38 @@
+<div class="list-page">
+  <header class="page-header">
+    <button class="btn-back" (click)="goBack()">← Back to Dashboard</button>
+    <div class="page-title-wrap">
+      <span class="page-icon">📁</span>
+      <h1>{{ pageTitle }}</h1>
+      <span class="count-badge">{{ filteredProjects.length }}</span>
+    </div>
+  </header>
+
+  <div class="table-container">
+    <div class="loading" *ngIf="isLoading()">Loading...</div>
+
+    <table *ngIf="!isLoading()" class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Project Name</th>
+          <th>Status</th>
+          <th>Team Size</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let proj of filteredProjects; let i = index">
+          <td class="row-num">{{ i + 1 }}</td>
+          <td class="name-cell">{{ proj.name }}</td>
+          <td>
+            <span class="badge" [ngClass]="getStatusClass(proj.status)">{{ proj.status }}</span>
+          </td>
+          <td>{{ proj.team_size }}</td>
+        </tr>
+        <tr *ngIf="filteredProjects.length === 0">
+          <td colspan="4" class="empty-row">No projects found.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

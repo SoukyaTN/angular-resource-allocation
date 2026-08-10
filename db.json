@@ -1,0 +1,310 @@
+{
+  "admins": [
+    {
+      "id": "1",
+      "email": "admin@example.com",
+      "password": "password123",
+      "name": "Admin User",
+      "role": "admin"
+    }
+  ],
+  "employees": [
+    {
+      "id": "1",
+      "name": "Alice Johnson",
+      "email": "alice@example.com",
+      "password": "emp123",
+      "role": "employee",
+      "designation": "Senior Software Engineer",
+      "status": "allocated",
+      "project": "Project Alpha",
+      "skills": [
+        "Angular",
+        "TypeScript",
+        "RxJS",
+        "Node.js",
+        "JavaScript"
+      ],
+      "experience": 5
+    },
+    {
+      "id": "2",
+      "name": "Bob Smith",
+      "email": "bob@example.com",
+      "password": "emp123",
+      "role": "employee",
+      "designation": "Software Engineer",
+      "status": "bench",
+      "project": "",
+      "skills": [
+        "React",
+        "Node.js",
+        "MongoDB",
+        "Express"
+      ],
+      "experience": 3
+    },
+    {
+      "id": "3",
+      "name": "Carol White",
+      "email": "carol@example.com",
+      "password": "emp123",
+      "role": "employee",
+      "designation": "Lead Engineer",
+      "status": "allocated",
+      "project": "Project Beta",
+      "skills": [
+        "React Native",
+        "TypeScript",
+        "GraphQL",
+        "AWS"
+      ],
+      "experience": 7
+    },
+    {
+      "id": "4",
+      "name": "David Lee",
+      "email": "david@example.com",
+      "password": "emp123",
+      "role": "employee",
+      "designation": "Software Engineer",
+      "status": "allocated",
+      "project": "Project Alpha",
+      "skills": [
+        "Python",
+        "Django",
+        "REST API",
+        "PostgreSQL"
+      ],
+      "experience": 1
+    },
+    {
+      "id": "5",
+      "name": "Eve Taylor",
+      "email": "eve@example.com",
+      "password": "emp123",
+      "role": "employee",
+      "designation": "Lead Engineer",
+      "status": "allocated",
+      "project": "Project Delta",
+      "skills": [
+        "Python",
+        "FastAPI",
+        "Docker",
+        "AWS"
+      ],
+      "experience": 6
+    },
+    {
+      "id": "6",
+      "name": "Frank Harris",
+      "email": "frank@example.com",
+      "password": "emp123",
+      "role": "employee",
+      "designation": "Software Engineer",
+      "status": "allocated",
+      "project": "Project Alpha",
+      "skills": [
+        "React JS",
+        "JavaScript",
+        "CSS",
+        "REST API"
+      ],
+      "experience": 3
+    },
+    {
+      "id": "7",
+      "name": "Grace Clark",
+      "email": "grace@example.com",
+      "password": "emp123",
+      "role": "employee",
+      "designation": "Software Engineer",
+      "status": "allocated",
+      "project": "Project Beta",
+      "skills": [
+        "Angular",
+        "TypeScript",
+        "NgRx",
+        "Jasmine"
+      ],
+      "experience": 2
+    },
+    {
+      "id": "8",
+      "name": "Hank Lewis",
+      "email": "hank@example.com",
+      "password": "emp123",
+      "role": "employee",
+      "designation": "Lead Engineer",
+      "status": "allocated",
+      "project": "Project Delta",
+      "skills": [
+        "Go",
+        "gRPC",
+        "Kafka",
+        "Redis"
+      ],
+      "experience": 8
+    },
+    {
+      "id": "9",
+      "name": "Ivy Walker",
+      "email": "ivy@example.com",
+      "password": "rm1234",
+      "role": "rm",
+      "designation": "Resource Manager",
+      "status": "allocated",
+      "project": "Project Alpha",
+      "skills": [
+        "Resource Planning",
+        "Workforce Management",
+        "JIRA",
+        "Agile",
+        "Capacity Planning"
+      ],
+      "experience": 6
+    },
+    {
+      "id": "10",
+      "name": "Jack Hall",
+      "email": "jack@example.com",
+      "password": "emp123",
+      "role": "employee",
+      "designation": "Software Engineer",
+      "status": "bench",
+      "project": "",
+      "skills": [
+        "Python",
+        "Machine Learning",
+        "TensorFlow",
+        "Pandas"
+      ],
+      "experience": 4
+    },
+    {
+      "id": "11",
+      "name": "Jill King",
+      "email": "jill@example.com",
+      "password": "dm1234",
+      "role": "dm",
+      "designation": "Delivery Manager",
+      "status": "allocated",
+      "project": "Project Alpha",
+      "skills": [
+        "Project Management",
+        "Scrum",
+        "JIRA"
+      ],
+      "experience": 9
+    },
+    {
+      "id": "12",
+      "name": "James Brown",
+      "email": "james@example.com",
+      "password": "dm1234",
+      "role": "employee",
+      "designation": "Delivery Manager",
+      "status": "allocated",
+      "project": "Project Beta",
+      "skills": [
+        "Project Management",
+        "Scrum",
+        "JIRA",
+        "Risk management"
+      ],
+      "experience": 12
+    },
+    {
+      "name": "Adarsh",
+      "email": "Adarsh.s@gmail.com",
+      "password": "emp123",
+      "role": "employee",
+      "designation": "Devops Engineer",
+      "status": "allocated",
+      "project": "",
+      "skills": [],
+      "experience": 5,
+      "id": "QjPu_7tr8Eo"
+    }
+  ],
+  "projects": [
+    {
+      "id": "1",
+      "name": "Project Alpha",
+      "status": "active",
+      "dm_id": 11,
+      "team_size": 8,
+      "progress": 65
+    },
+    {
+      "id": "2",
+      "name": "Project Beta",
+      "status": "active",
+      "dm_id": 2,
+      "team_size": 12,
+      "progress": 40
+    },
+    {
+      "id": "3",
+      "name": "Project Gamma",
+      "status": "completed",
+      "dm_id": 11,
+      "team_size": 6,
+      "progress": 100
+    },
+    {
+      "id": "4",
+      "name": "Project Delta",
+      "status": "completed",
+      "dm_id": 11,
+      "team_size": 10,
+      "progress": 100
+    },
+    {
+      "id": "5",
+      "name": "Project Epsilon",
+      "status": "completed",
+      "dm_id": 2,
+      "team_size": 5,
+      "progress": 100
+    }
+  ],
+  "requests": [
+    {
+      "id": "1",
+      "title": "Need Angular Developer",
+      "status": "open",
+      "priority": "high",
+      "dm_id": 11
+    },
+    {
+      "id": "2",
+      "title": "Backend Engineer Required",
+      "status": "open",
+      "priority": "medium",
+      "dm_id": 2
+    },
+    {
+      "id": "3",
+      "title": "QA Engineer Needed",
+      "status": "closed",
+      "priority": "low",
+      "dm_id": 11
+    },
+    {
+      "id": "4",
+      "title": "DevOps Engineer",
+      "status": "open",
+      "priority": "high",
+      "dm_id": 2
+    },
+    {
+      "title": "Python developer",
+      "priority": "medium",
+      "status": "closed",
+      "dm_id": "11",
+      "id": "cpsXKj8Anxo"
+    }
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
+}

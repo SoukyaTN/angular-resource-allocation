@@ -1,0 +1,271 @@
+<!-- Header -->
+<header class="rm-header">
+  <div class="header-left">
+    <span class="logo-icon">🗂️</span>
+    <div>
+      <h1 class="header-title">Resource Allocation Portal</h1>
+      <span class="header-subtitle">Resource Manager Dashboard</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="user-badge">👤 {{ currentUser()?.name }}</span>
+    <button class="btn-logout" (click)="logout()">Logout</button>
+  </div>
+</header>
+
+<main class="rm-main">
+
+  <!-- Stats Row -->
+  <div class="stats-row">
+    <div class="stat-card blue clickable" (click)="activeTab.set('bench')">
+      <div class="stat-icon">🎯</div>
+      <div class="stat-info">
+        <span class="stat-label">Available Engineers</span>
+        <span class="stat-value">{{ availableCount }}</span>
+      </div>
+    </div>
+    <div class="stat-card orange clickable" (click)="activeTab.set('bench')">
+      <div class="stat-icon">🧑‍💻</div>
+      <div class="stat-info">
+        <span class="stat-label">Bench Engineers</span>
+        <span class="stat-value">{{ benchCount }}</span>
+      </div>
+    </div>
+    <div class="stat-card green clickable" (click)="activeTab.set('allocated')">
+      <div class="stat-icon">✅</div>
+      <div class="stat-info">
+        <span class="stat-label">Allocated Engineers</span>
+        <span class="stat-value">{{ allocatedCount }}</span>
+      </div>
+    </div>
+    <div class="stat-card indigo">
+      <div class="stat-icon">📁</div>
+      <div class="stat-info">
+        <span class="stat-label">Active Projects</span>
+        <span class="stat-value">{{ activeProjectCount }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <button class="tab-btn" [class.active]="activeTab() === 'bench'" (click)="activeTab.set('bench')">
+      🧑‍💻 Bench & Available
+    </button>
+    <button class="tab-btn" [class.active]="activeTab() === 'allocated'" (click)="activeTab.set('allocated')">
+      ✅ Allocated Engineers
+    </button>
+    <button class="tab-btn" [class.active]="activeTab() === 'search'" (click)="activeTab.set('search')">
+      🔍 Search Engineers
+    </button>
+  </div>
+
+  <!-- Bench & Available Tab -->
+  <div class="tab-content" *ngIf="activeTab() === 'bench'">
+    <div class="table-toolbar">
+      <h2>Bench &amp; Available Engineers</h2>
+      <span class="record-count">{{ benchAndAvailableEngineers.length }} engineers</span>
+    </div>
+    <div class="loading" *ngIf="isLoading()">Loading...</div>
+    <div class="table-wrap" *ngIf="!isLoading()">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Designation</th>
+            <th>Status</th>
+            <th>Skills</th>
+            <th>Experience</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let emp of benchAndAvailableEngineers; let i = index">
+            <td class="row-num">{{ i + 1 }}</td>
+            <td class="name-cell">{{ emp.name }}</td>
+            <td>{{ emp.designation }}</td>
+            <td><span class="badge" [ngClass]="getStatusClass(emp.status)">{{ emp.status }}</span></td>
+            <td>
+              <div class="skills-wrap">
+                <span class="skill-tag" *ngFor="let s of (emp.skills || []).slice(0, 3)">{{ s }}</span>
+                <span class="skill-more" *ngIf="(emp.skills || []).length > 3">+{{ emp.skills.length - 3 }}</span>
+              </div>
+            </td>
+            <td>{{ emp.experience }} yr{{ emp.experience !== 1 ? 's' : '' }}</td>
+            <td class="actions-cell">
+              <button class="btn-allocate" (click)="openAllocateModal(emp)">🚀 Allocate</button>
+            </td>
+          </tr>
+          <tr *ngIf="benchAndAvailableEngineers.length === 0">
+            <td colspan="7" class="empty-row">No bench or available engineers.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Allocated Engineers Tab -->
+  <div class="tab-content" *ngIf="activeTab() === 'allocated'">
+    <div class="table-toolbar">
+      <h2>Allocated Engineers</h2>
+      <span class="record-count">{{ allocatedEngineers.length }} engineers</span>
+    </div>
+    <div class="loading" *ngIf="isLoading()">Loading...</div>
+    <div class="table-wrap" *ngIf="!isLoading()">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Designation</th>
+            <th>Status</th>
+            <th>Project</th>
+            <th>Skills</th>
+            <th>Experience</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let emp of allocatedEngineers; let i = index">
+            <td class="row-num">{{ i + 1 }}</td>
+            <td class="name-cell">{{ emp.name }}</td>
+            <td>{{ emp.designation }}</td>
+            <td><span class="badge" [ngClass]="getStatusClass(emp.status)">{{ emp.status }}</span></td>
+            <td class="project-cell">{{ emp.project || '—' }}</td>
+            <td>
+              <div class="skills-wrap">
+                <span class="skill-tag" *ngFor="let s of (emp.skills || []).slice(0, 3)">{{ s }}</span>
+                <span class="skill-more" *ngIf="(emp.skills || []).length > 3">+{{ emp.skills.length - 3 }}</span>
+              </div>
+            </td>
+            <td>{{ emp.experience }} yr{{ emp.experience !== 1 ? 's' : '' }}</td>
+            <td class="actions-cell">
+              <button class="btn-release" (click)="releaseEngineer(emp)">🔓 Release</button>
+              <button class="btn-bench" (click)="moveToBench(emp)">📋 Bench</button>
+            </td>
+          </tr>
+          <tr *ngIf="allocatedEngineers.length === 0">
+            <td colspan="8" class="empty-row">No allocated engineers.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Search Tab -->
+  <div class="tab-content" *ngIf="activeTab() === 'search'">
+    <div class="table-toolbar">
+      <h2>Search Engineers</h2>
+    </div>
+
+    <!-- Search Filters -->
+    <div class="search-filters">
+      <div class="filter-group">
+        <label>🔍 Search by Skill</label>
+        <input type="text" [(ngModel)]="searchSkill" placeholder="e.g. Angular, Python, AWS..." class="filter-input" />
+      </div>
+      <div class="filter-group">
+        <label>📅 Min Experience (yrs)</label>
+        <input type="number" [(ngModel)]="searchMinExp" placeholder="e.g. 3" min="0" class="filter-input" />
+      </div>
+      <div class="filter-group">
+        <label>⚡ Status</label>
+        <select [(ngModel)]="searchStatus" class="filter-select">
+          <option value="all">All Statuses</option>
+          <option value="available">Available</option>
+          <option value="bench">Bench</option>
+          <option value="allocated">Allocated</option>
+        </select>
+      </div>
+      <div class="filter-group filter-result">
+        <span class="result-count">{{ searchResults.length }} result{{ searchResults.length !== 1 ? 's' : '' }}</span>
+      </div>
+    </div>
+
+    <div class="loading" *ngIf="isLoading()">Loading...</div>
+    <div class="table-wrap" *ngIf="!isLoading()">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Designation</th>
+            <th>Status</th>
+            <th>Project</th>
+            <th>Skills</th>
+            <th>Experience</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let emp of searchResults; let i = index">
+            <td class="row-num">{{ i + 1 }}</td>
+            <td class="name-cell">{{ emp.name }}</td>
+            <td>{{ emp.designation }}</td>
+            <td><span class="badge" [ngClass]="getStatusClass(emp.status)">{{ emp.status }}</span></td>
+            <td class="project-cell">{{ emp.project || '—' }}</td>
+            <td>
+              <div class="skills-wrap">
+                <span class="skill-tag" *ngFor="let s of (emp.skills || [])">{{ s }}</span>
+              </div>
+            </td>
+            <td>{{ emp.experience }} yr{{ emp.experience !== 1 ? 's' : '' }}</td>
+            <td class="actions-cell">
+              <button class="btn-allocate" *ngIf="emp.status !== 'allocated'" (click)="openAllocateModal(emp)">🚀 Allocate</button>
+              <button class="btn-release" *ngIf="emp.status === 'allocated'" (click)="releaseEngineer(emp)">🔓 Release</button>
+              <button class="btn-bench" *ngIf="emp.status === 'allocated'" (click)="moveToBench(emp)">📋 Bench</button>
+            </td>
+          </tr>
+          <tr *ngIf="searchResults.length === 0">
+            <td colspan="8" class="empty-row">No engineers match your search criteria.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<!-- Allocate Engineer Modal -->
+<div class="modal-overlay" *ngIf="showAllocateModal()" (click)="showAllocateModal.set(false)">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Allocate: {{ selectedEmployee()?.name }}</h2>
+      <button class="modal-close" (click)="showAllocateModal.set(false)">✕</button>
+    </div>
+    <form [formGroup]="allocateForm" (ngSubmit)="submitAllocate()" class="modal-form">
+      <div class="alert alert-success" *ngIf="successMessage()">✅ {{ successMessage() }}</div>
+      <div class="alert alert-error" *ngIf="errorMessage()">❌ {{ errorMessage() }}</div>
+
+      <div class="emp-info-card">
+        <div><strong>Name:</strong> {{ selectedEmployee()?.name }}</div>
+        <div><strong>Designation:</strong> {{ selectedEmployee()?.designation }}</div>
+        <div><strong>Experience:</strong> {{ selectedEmployee()?.experience }} yrs</div>
+        <div><strong>Current Status:</strong>
+          <span class="badge" [ngClass]="getStatusClass(selectedEmployee()?.status)">
+            {{ selectedEmployee()?.status }}
+          </span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Select Project *</label>
+        <select formControlName="project">
+          <option value="">-- Select a Project --</option>
+          <option *ngFor="let p of activeProjects" [value]="p.name">{{ p.name }}</option>
+        </select>
+        <span class="error-text" *ngIf="allocateForm.get('project')?.invalid && allocateForm.get('project')?.touched">
+          Please select a project
+        </span>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" (click)="showAllocateModal.set(false)">Cancel</button>
+        <button type="submit" class="btn-submit" [disabled]="allocateForm.invalid || isSubmitting()">
+          {{ isSubmitting() ? 'Allocating...' : '🚀 Allocate Engineer' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

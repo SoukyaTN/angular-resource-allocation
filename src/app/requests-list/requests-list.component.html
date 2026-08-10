@@ -1,0 +1,40 @@
+<div class="list-page">
+  <header class="page-header">
+    <button class="btn-back" (click)="goBack()">← Back to Dashboard</button>
+    <div class="page-title-wrap">
+      <span class="page-icon">📋</span>
+      <h1>{{ pageTitle }}</h1>
+      <span class="count-badge">{{ filteredRequests.length }}</span>
+    </div>
+  </header>
+
+  <div class="table-container">
+    <div class="loading" *ngIf="isLoading()">Loading...</div>
+
+    <table *ngIf="!isLoading()" class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Request Title</th>
+          <th>Status</th>
+          <th>Priority</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let req of filteredRequests; let i = index">
+          <td class="row-num">{{ i + 1 }}</td>
+          <td class="name-cell">{{ req.title }}</td>
+          <td>
+            <span class="badge" [ngClass]="getStatusClass(req.status)">{{ req.status }}</span>
+          </td>
+          <td>
+            <span class="badge" [ngClass]="getPriorityClass(req.priority)">{{ req.priority }}</span>
+          </td>
+        </tr>
+        <tr *ngIf="filteredRequests.length === 0">
+          <td colspan="4" class="empty-row">No requests found.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

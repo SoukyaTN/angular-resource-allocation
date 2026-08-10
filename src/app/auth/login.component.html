@@ -1,0 +1,73 @@
+<div class="login-container">
+  <div class="login-box">
+    <div class="login-header">
+      <h1>Admin Login</h1>
+      <p>Resource Allocation Portal</p>
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+      <!-- Error Message -->
+      <div *ngIf="errorMessage" class="error-message">
+        <svg class="error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        {{ errorMessage }}
+      </div>
+
+      <!-- Email Field -->
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          placeholder="admin@example.com"
+          class="form-input"
+          [ngClass]="{ 'is-invalid': email?.invalid && email?.touched }"
+        />
+        <div *ngIf="email?.invalid && email?.touched" class="error-text">
+          <span *ngIf="email?.errors?.['required']">Email is required</span>
+          <span *ngIf="email?.errors?.['email']">Please enter a valid email</span>
+        </div>
+      </div>
+
+      <!-- Password Field -->
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+          placeholder="Enter your password"
+          class="form-input"
+          [ngClass]="{ 'is-invalid': password?.invalid && password?.touched }"
+        />
+        <div *ngIf="password?.invalid && password?.touched" class="error-text">
+          <span *ngIf="password?.errors?.['required']">Password is required</span>
+          <span *ngIf="password?.errors?.['minlength']">Password must be at least 6 characters</span>
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <button
+        type="submit"
+        class="submit-btn"
+        [disabled]="loginForm.invalid || isLoading"
+      >
+        <span *ngIf="!isLoading">Sign In</span>
+        <span *ngIf="isLoading" class="loading-spinner">
+          <span class="spinner"></span>Loading...
+        </span>
+      </button>
+    </form>
+
+    <div class="login-footer">
+      <p><strong>Admin:</strong> admin@example.com / password123</p>
+      <p><strong>DM:</strong> jill@example.com / dm1234</p>
+      <p><strong>RM:</strong> ivy@example.com / rm1234</p>
+      <p><strong>Employee:</strong> alice@example.com / emp123</p>
+    </div>
+  </div>
+</div>

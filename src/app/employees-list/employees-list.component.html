@@ -1,0 +1,51 @@
+<div class="list-page">
+  <header class="page-header">
+    <button class="btn-back" (click)="goBack()">← Back to Dashboard</button>
+    <div class="page-title-wrap">
+      <span class="page-icon">👥</span>
+      <h1>{{ pageTitle }}</h1>
+      <span class="count-badge">{{ filteredEmployees.length }}</span>
+    </div>
+  </header>
+
+  <div class="table-container">
+    <div class="loading" *ngIf="isLoading()">Loading...</div>
+
+    <table *ngIf="!isLoading()" class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Designation</th>
+          <th>Status</th>
+          <th>Project</th>
+          <th>Skills</th>
+          <th>Experience</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let emp of filteredEmployees; let i = index">
+          <td class="row-num">{{ i + 1 }}</td>
+          <td class="name-cell">{{ emp.name }}</td>
+          <td class="email-cell">{{ emp.email }}</td>
+          <td>{{ emp.designation }}</td>
+          <td>
+            <span class="badge" [ngClass]="getStatusClass(emp.status)">{{ emp.status }}</span>
+          </td>
+          <td>{{ emp.project || '—' }}</td>
+          <td>
+            <div class="skills-wrap">
+              <span class="skill-tag" *ngFor="let skill of emp.skills">{{ skill }}</span>
+              <span *ngIf="!emp.skills?.length" class="empty">—</span>
+            </div>
+          </td>
+          <td>{{ emp.experience }} yr{{ emp.experience !== 1 ? 's' : '' }}</td>
+        </tr>
+        <tr *ngIf="filteredEmployees.length === 0">
+          <td colspan="8" class="empty-row">No employees found.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

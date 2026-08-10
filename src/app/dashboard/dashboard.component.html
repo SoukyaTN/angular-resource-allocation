@@ -1,0 +1,172 @@
+<!-- Header -->
+<header class="header">
+  <div class="header-left">
+    <span class="logo-icon">🏢</span>
+    <div>
+      <h1 class="header-title">Resource Allocation Portal</h1>
+      <span class="header-subtitle">Admin Dashboard</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="user-badge">👤 {{ currentUser()?.name }}</span>
+    <button class="btn-add-user" (click)="openAddUserModal()">+ Add User</button>
+    <button class="btn-logout" (click)="logout()">Logout</button>
+  </div>
+</header>
+
+<!-- Stats Grid -->
+<main class="main-content">
+  <h2 class="section-title">Overview</h2>
+
+  <div class="stats-grid">
+    <div class="stat-card blue clickable" (click)="navigateTo('employees')">
+      <div class="stat-icon">👥</div>
+      <div class="stat-info">
+        <span class="stat-label">Total Employees</span>
+        <span class="stat-value">{{ stats().totalEmployees }}</span>
+      </div>
+    </div>
+
+    <div class="stat-card green clickable" (click)="navigateTo('projects', 'active')">
+      <div class="stat-icon">📁</div>
+      <div class="stat-info">
+        <span class="stat-label">Active Projects</span>
+        <span class="stat-value">{{ stats().activeProjects }}</span>
+      </div>
+    </div>
+
+    <div class="stat-card purple clickable" (click)="navigateTo('employees', 'allocated')">
+      <div class="stat-icon">✅</div>
+      <div class="stat-info">
+        <span class="stat-label">Allocated Engineers</span>
+        <span class="stat-value">{{ stats().allocatedEngineers }}</span>
+      </div>
+    </div>
+
+    <div class="stat-card orange clickable" (click)="navigateTo('employees', 'bench')">
+      <div class="stat-icon">🧑‍💻</div>
+      <div class="stat-info">
+        <span class="stat-label">Bench Engineers</span>
+        <span class="stat-value">{{ stats().benchEngineers }}</span>
+      </div>
+    </div>
+
+    <div class="stat-card red clickable" (click)="navigateTo('requests', 'open')">
+      <div class="stat-icon">📋</div>
+      <div class="stat-info">
+        <span class="stat-label">Open Requests</span>
+        <span class="stat-value">{{ stats().openRequests }}</span>
+      </div>
+    </div>
+
+    <div class="stat-card indigo clickable" (click)="navigateTo('projects', 'completed')">
+      <div class="stat-icon">✔️</div>
+      <div class="stat-info">
+        <span class="stat-label">Completed Projects</span>
+        <span class="stat-value">{{ stats().completedProjects }}</span>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Add User Modal -->
+<div class="modal-overlay" *ngIf="showAddUserModal()" (click)="closeModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Add New User</h2>
+      <button class="modal-close" (click)="closeModal()">✕</button>
+    </div>
+
+    <form [formGroup]="addUserForm" (ngSubmit)="onSubmitUser()" class="modal-form">
+
+      <div class="alert alert-success" *ngIf="successMessage()">✅ {{ successMessage() }}</div>
+      <div class="alert alert-error" *ngIf="errorMessage()">❌ {{ errorMessage() }}</div>
+
+      <div class="form-row">
+        <div class="form-group full-width">
+          <label>User Role</label>
+          <div class="role-toggle">
+            <label class="role-option" [class.active]="selectedRole === 'employee'">
+              <input type="radio" formControlName="role" value="employee" />
+              🧑‍💻 Employee
+            </label>
+            <label class="role-option" [class.active]="selectedRole === 'dm'">
+              <input type="radio" formControlName="role" value="dm" />
+              📊 Delivery Manager
+            </label>
+            <label class="role-option" [class.active]="selectedRole === 'rm'">
+              <input type="radio" formControlName="role" value="rm" />
+              🗂️ Resource Manager
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Full Name *</label>
+          <input type="text" formControlName="name" placeholder="Enter full name" />
+          <span class="error-text" *ngIf="addUserForm.get('name')?.invalid && addUserForm.get('name')?.touched">
+            Name is required (min 2 chars)
+          </span>
+        </div>
+        <div class="form-group">
+          <label>Email Address *</label>
+          <input type="email" formControlName="email" placeholder="user@example.com" />
+          <span class="error-text" *ngIf="addUserForm.get('email')?.invalid && addUserForm.get('email')?.touched">
+            Valid email is required
+          </span>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Password *</label>
+          <input type="password" formControlName="password" placeholder="Min 6 characters" />
+          <span class="error-text" *ngIf="addUserForm.get('password')?.invalid && addUserForm.get('password')?.touched">
+            Password min 6 characters
+          </span>
+        </div>
+        <div class="form-group">
+          <label>Designation *</label>
+          <input type="text" formControlName="designation" placeholder="e.g. Software Engineer" />
+          <span class="error-text" *ngIf="addUserForm.get('designation')?.invalid && addUserForm.get('designation')?.touched">
+            Designation is required
+          </span>
+        </div>
+      </div>
+
+      <div class="form-row" *ngIf="selectedRole === 'employee'">
+        <div class="form-group">
+          <label>Years of Experience</label>
+          <input type="number" formControlName="experience" placeholder="e.g. 3" min="0" />
+        </div>
+        <div class="form-group">
+          <label>Initial Status</label>
+          <select formControlName="status">
+            <option value="bench">Bench</option>
+            <option value="allocated">Allocated</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row" *ngIf="selectedRole === 'dm' || selectedRole === 'rm'">
+        <div class="form-group" [class.full-width]="selectedRole === 'dm'">
+          <label>Department</label>
+          <input type="text" formControlName="department" placeholder="e.g. Engineering, Product" />
+        </div>
+        <div class="form-group" *ngIf="selectedRole === 'rm'">
+          <label>Years of Experience</label>
+          <input type="number" formControlName="experience" placeholder="e.g. 5" min="0" />
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" (click)="closeModal()">Cancel</button>
+        <button type="submit" class="btn-submit" [disabled]="addUserForm.invalid || isSubmitting()">
+          {{ isSubmitting() ? 'Adding...' : 'Add User' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

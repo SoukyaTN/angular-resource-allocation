@@ -1,0 +1,262 @@
+<!-- Header -->
+<header class="dm-header">
+  <div class="header-left">
+    <span class="logo-icon">📊</span>
+    <div>
+      <h1 class="header-title">Resource Allocation Portal</h1>
+      <span class="header-subtitle">Delivery Manager Dashboard</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="user-badge">👤 {{ currentUser()?.name }}</span>
+    <button class="btn-logout" (click)="logout()">Logout</button>
+  </div>
+</header>
+
+<main class="dm-main">
+
+  <!-- Stats Row -->
+  <div class="stats-row">
+    <div class="stat-card teal">
+      <div class="stat-icon">📁</div>
+      <div class="stat-info">
+        <span class="stat-label">Active Projects</span>
+        <span class="stat-value">{{ activeProjectCount }}</span>
+      </div>
+    </div>
+    <div class="stat-card blue">
+      <div class="stat-icon">👥</div>
+      <div class="stat-info">
+        <span class="stat-label">Total Team Members</span>
+        <span class="stat-value">{{ totalTeamMembers }}</span>
+      </div>
+    </div>
+    <div class="stat-card orange">
+      <div class="stat-icon">📋</div>
+      <div class="stat-info">
+        <span class="stat-label">Open Requests</span>
+        <span class="stat-value">{{ openRequestCount }}</span>
+      </div>
+    </div>
+    <div class="stat-card indigo">
+      <div class="stat-icon">✔️</div>
+      <div class="stat-info">
+        <span class="stat-label">Completed Projects</span>
+        <span class="stat-value">{{ completedProjectCount }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tab-bar">
+    <button class="tab-btn" [class.active]="activeTab() === 'projects'" (click)="activeTab.set('projects')">
+      📁 My Projects
+    </button>
+    <button class="tab-btn" [class.active]="activeTab() === 'requests'" (click)="activeTab.set('requests')">
+      📋 Resource Requests
+    </button>
+  </div>
+
+  <!-- Projects Tab -->
+  <div class="tab-content" *ngIf="activeTab() === 'projects'">
+    <div class="table-toolbar">
+      <h2>Projects</h2>
+      <button class="btn-create" (click)="openCreateProject()">+ New Project</button>
+    </div>
+    <div class="loading" *ngIf="isLoading()">Loading...</div>
+    <div class="table-wrap" *ngIf="!isLoading()">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Project Name</th>
+            <th>Status</th>
+            <th>Progress</th>
+            <th>Team Size</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let proj of allProjects(); let i = index">
+            <td class="row-num">{{ i + 1 }}</td>
+            <td class="name-cell">{{ proj.name }}</td>
+            <td><span class="badge" [ngClass]="getStatusClass(proj.status)">{{ proj.status }}</span></td>
+            <td>
+              <div class="progress-wrap">
+                <div class="progress-bar">
+                  <div class="progress-fill" [style.width.%]="proj.progress || 0"
+                    [class.fill-complete]="proj.progress >= 100"></div>
+                </div>
+                <span class="progress-pct">{{ proj.progress || 0 }}%</span>
+              </div>
+            </td>
+            <td>{{ proj.team_size }}</td>
+            <td class="actions-cell">
+              <button class="btn-edit" (click)="openEditProject(proj)">✏️ Update</button>
+              <button class="btn-delete" (click)="deleteProject(proj.id)">🗑️</button>
+            </td>
+          </tr>
+          <tr *ngIf="allProjects().length === 0">
+            <td colspan="6" class="empty-row">No projects yet. Click "+ New Project" to create one.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Requests Tab -->
+  <div class="tab-content" *ngIf="activeTab() === 'requests'">
+    <div class="table-toolbar">
+      <h2>Resource Requests</h2>
+      <button class="btn-create" (click)="openCreateRequest()">+ New Request</button>
+    </div>
+    <div class="loading" *ngIf="isLoading()">Loading...</div>
+    <div class="table-wrap" *ngIf="!isLoading()">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Request Title</th>
+            <th>Priority</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let req of allRequests(); let i = index">
+            <td class="row-num">{{ i + 1 }}</td>
+            <td class="name-cell">{{ req.title }}</td>
+            <td><span class="badge" [ngClass]="getPriorityClass(req.priority)">{{ req.priority }}</span></td>
+            <td><span class="badge" [ngClass]="getStatusClass(req.status)">{{ req.status }}</span></td>
+            <td>
+              <button class="btn-close-req" (click)="closeRequest(req)" *ngIf="req.status === 'open'">✅ Mark Closed</button>
+              <span class="closed-label" *ngIf="req.status === 'closed'">—</span>
+            </td>
+          </tr>
+          <tr *ngIf="allRequests().length === 0">
+            <td colspan="5" class="empty-row">No requests yet. Click "+ New Request" to create one.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<!-- Create Project Modal -->
+<div class="modal-overlay" *ngIf="showCreateProjectModal()" (click)="showCreateProjectModal.set(false)">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Create New Project</h2>
+      <button class="modal-close" (click)="showCreateProjectModal.set(false)">✕</button>
+    </div>
+    <form [formGroup]="createProjectForm" (ngSubmit)="submitCreateProject()" class="modal-form">
+      <div class="alert alert-success" *ngIf="successMessage()">✅ {{ successMessage() }}</div>
+      <div class="alert alert-error" *ngIf="errorMessage()">❌ {{ errorMessage() }}</div>
+      <div class="form-group">
+        <label>Project Name *</label>
+        <input type="text" formControlName="name" placeholder="e.g. Project Phoenix" />
+        <span class="error-text" *ngIf="createProjectForm.get('name')?.invalid && createProjectForm.get('name')?.touched">Name is required</span>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Team Size *</label>
+          <input type="number" formControlName="team_size" min="1" placeholder="e.g. 8" />
+        </div>
+        <div class="form-group">
+          <label>Initial Status</label>
+          <select formControlName="status">
+            <option value="active">Active</option>
+            <option value="completed">Completed</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Initial Progress ({{ createProjectForm.get('progress')?.value }}%)</label>
+        <input type="range" formControlName="progress" min="0" max="100" class="range-input" />
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" (click)="showCreateProjectModal.set(false)">Cancel</button>
+        <button type="submit" class="btn-submit" [disabled]="createProjectForm.invalid || isSubmitting()">
+          {{ isSubmitting() ? 'Creating...' : 'Create Project' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Create Request Modal -->
+<div class="modal-overlay" *ngIf="showCreateRequestModal()" (click)="showCreateRequestModal.set(false)">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>New Resource Request</h2>
+      <button class="modal-close" (click)="showCreateRequestModal.set(false)">✕</button>
+    </div>
+    <form [formGroup]="createRequestForm" (ngSubmit)="submitCreateRequest()" class="modal-form">
+      <div class="alert alert-success" *ngIf="successMessage()">✅ {{ successMessage() }}</div>
+      <div class="alert alert-error" *ngIf="errorMessage()">❌ {{ errorMessage() }}</div>
+      <div class="form-group">
+        <label>Request Title *</label>
+        <input type="text" formControlName="title" placeholder="e.g. Need Senior Angular Developer" />
+        <span class="error-text" *ngIf="createRequestForm.get('title')?.invalid && createRequestForm.get('title')?.touched">Title is required (min 3 chars)</span>
+      </div>
+      <div class="form-group">
+        <label>Priority *</label>
+        <select formControlName="priority">
+          <option value="high">🔴 High</option>
+          <option value="medium">🟠 Medium</option>
+          <option value="low">🔵 Low</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" (click)="showCreateRequestModal.set(false)">Cancel</button>
+        <button type="submit" class="btn-submit" [disabled]="createRequestForm.invalid || isSubmitting()">
+          {{ isSubmitting() ? 'Submitting...' : 'Submit Request' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Edit / Update Project Modal -->
+<div class="modal-overlay" *ngIf="showEditProjectModal()" (click)="showEditProjectModal.set(false)">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Update: {{ selectedProject()?.name }}</h2>
+      <button class="modal-close" (click)="showEditProjectModal.set(false)">✕</button>
+    </div>
+    <form [formGroup]="editProjectForm" (ngSubmit)="submitEditProject()" class="modal-form">
+      <div class="alert alert-success" *ngIf="successMessage()">✅ {{ successMessage() }}</div>
+      <div class="alert alert-error" *ngIf="errorMessage()">❌ {{ errorMessage() }}</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Status</label>
+          <select formControlName="status">
+            <option value="active">Active</option>
+            <option value="completed">Completed</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Team Size</label>
+          <input type="number" formControlName="team_size" min="1" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Project Progress: <strong>{{ editProjectForm.get('progress')?.value }}%</strong></label>
+        <input type="range" formControlName="progress" min="0" max="100" class="range-input" />
+        <div class="progress-preview">
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="editProjectForm.get('progress')?.value"
+              [class.fill-complete]="editProjectForm.get('progress')?.value >= 100"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" (click)="showEditProjectModal.set(false)">Cancel</button>
+        <button type="submit" class="btn-submit" [disabled]="editProjectForm.invalid || isSubmitting()">
+          {{ isSubmitting() ? 'Saving...' : 'Save Changes' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
