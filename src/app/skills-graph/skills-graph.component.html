@@ -1,0 +1,69 @@
+<div class="graph-wrapper">
+
+  <!-- Canvas area -->
+  <div class="graph-area">
+    <canvas #graphCanvas width="860" height="490" class="graph-canvas"></canvas>
+    <div class="graph-legend">
+      <div class="legend-item">
+        <span class="ldot ldot-alloc"></span> Allocated
+      </div>
+      <div class="legend-item">
+        <span class="ldot ldot-bench"></span> Bench
+      </div>
+      <div class="legend-item">
+        <span class="lline"></span> Shared skills (thicker = more)
+      </div>
+      <div class="legend-item legend-note">
+        ⬤ Node size = skill count &nbsp;|&nbsp; Click node for details
+      </div>
+    </div>
+  </div>
+
+  <!-- Side panel -->
+  <div class="node-panel">
+
+    <div class="panel-hint" *ngIf="!selectedNode()">
+      <div class="hint-icon">🕸️</div>
+      <p>Click any <strong>node</strong> to see the engineer's skills and their match against open positions</p>
+    </div>
+
+    <div class="panel-content" *ngIf="selectedNode()">
+      <div class="panel-avatar" [ngClass]="selectedNode()!.status === 'allocated' ? 'av-green' : 'av-orange'">
+        {{ selectedNode()!.name.charAt(0) }}
+      </div>
+      <h4 class="panel-name">{{ selectedNode()!.name }}</h4>
+      <div class="panel-badges">
+        <span class="sbadge" [ngClass]="selectedNode()!.status === 'allocated' ? 'sb-alloc' : 'sb-bench'">
+          {{ selectedNode()!.status }}
+        </span>
+        <span class="ebadge">{{ selectedNode()!.experience }} yrs exp</span>
+      </div>
+
+      <div class="psection">
+        <div class="psection-title">🛠️ Skills ({{ selectedNode()!.skills.length }})</div>
+        <div class="pskills">
+          <span class="pskill-chip" *ngFor="let s of selectedNode()!.skills">{{ displaySkill(s) }}</span>
+          <span class="no-item" *ngIf="!selectedNode()!.skills.length">No skills added</span>
+        </div>
+      </div>
+
+      <div class="psection">
+        <div class="psection-title">📋 Open Position Matches</div>
+        <div *ngFor="let m of getPositionMatches(selectedNode()!)" class="pmatch-row">
+          <div class="pmatch-top">
+            <span class="pmatch-title">{{ m.title }}</span>
+            <span class="pmatch-pct" [ngClass]="m.pct >= 80 ? 'pct-h' : m.pct >= 40 ? 'pct-m' : 'pct-l'">{{ m.pct }}%</span>
+          </div>
+          <div class="pmatch-bar">
+            <div class="pmatch-fill" [style.width.%]="m.pct"
+              [ngClass]="m.pct >= 80 ? 'fill-h' : m.pct >= 40 ? 'fill-m' : 'fill-l'">
+            </div>
+          </div>
+        </div>
+        <span class="no-item" *ngIf="!openPositions.length">No open positions</span>
+      </div>
+    </div>
+
+  </div>
+
+</div>

@@ -31,7 +31,7 @@ export class DashboardComponent implements OnInit {
     benchEngineers: 0,
     allocatedEngineers: 0,
     openRequests: 0,
-    availableEngineers: 0,
+    availableEngineers: 0, // kept for interface compat, always 0
     completedProjects: 0
   });
 
@@ -43,7 +43,7 @@ export class DashboardComponent implements OnInit {
     designation: ['', Validators.required],
     department: [''],
     experience: [null],
-    status: ['available']
+    status: ['bench']
   });
 
   get selectedRole() {
@@ -66,14 +66,14 @@ export class DashboardComponent implements OnInit {
         benchEngineers: employees.filter(e => e.status === 'bench').length,
         allocatedEngineers: employees.filter(e => e.status === 'allocated').length,
         openRequests: requests.filter(r => r.status === 'open').length,
-        availableEngineers: employees.filter(e => e.status === 'available').length,
+        availableEngineers: 0,
         completedProjects: projects.filter(p => p.status === 'completed').length
       });
     });
   }
 
   openAddUserModal(): void {
-    this.addUserForm.reset({ role: 'employee', status: 'available' });
+    this.addUserForm.reset({ role: 'employee', status: 'bench' });
     this.successMessage.set('');
     this.errorMessage.set('');
     this.showAddUserModal.set(true);
@@ -97,7 +97,7 @@ export class DashboardComponent implements OnInit {
         password: formVal.password,
         role: 'employee' as const,
         designation: formVal.designation,
-        status: formVal.status || 'available',
+        status: formVal.status || 'bench',
         project: '',
         skills: [],
         experience: formVal.experience || 0

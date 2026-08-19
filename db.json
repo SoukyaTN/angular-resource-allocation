@@ -16,8 +16,8 @@
       "password": "emp123",
       "role": "employee",
       "designation": "Senior Software Engineer",
-      "status": "allocated",
-      "project": "Project Alpha",
+      "status": "bench",
+      "project": "",
       "skills": [
         "Angular",
         "TypeScript",
@@ -220,11 +220,25 @@
       "password": "emp123",
       "role": "employee",
       "designation": "Devops Engineer",
-      "status": "allocated",
+      "status": "bench",
       "project": "",
       "skills": [],
       "experience": 5,
       "id": "QjPu_7tr8Eo"
+    },
+    {
+      "name": "Soumya ",
+      "email": "soumya@gmail.com",
+      "password": "emp123",
+      "role": "employee",
+      "designation": "Python deveoper",
+      "status": "allocated",
+      "project": "Project Alpha",
+      "skills": [
+        "python, Java, AWS"
+      ],
+      "experience": 6,
+      "id": "E4MT3Sz4Bpk"
     }
   ],
   "projects": [
@@ -275,35 +289,82 @@
       "title": "Need Angular Developer",
       "status": "open",
       "priority": "high",
-      "dm_id": 11
+      "dm_id": 11,
+      "required_skills": [
+        "Angular",
+        "TypeScript",
+        "RxJS"
+      ]
     },
     {
       "id": "2",
       "title": "Backend Engineer Required",
       "status": "open",
       "priority": "medium",
-      "dm_id": 2
+      "dm_id": 2,
+      "required_skills": [
+        "Node.js",
+        "REST API",
+        "MongoDB"
+      ]
     },
     {
       "id": "3",
       "title": "QA Engineer Needed",
       "status": "closed",
       "priority": "low",
-      "dm_id": 11
+      "dm_id": 11,
+      "required_skills": [
+        "Jasmine",
+        "TypeScript"
+      ]
     },
     {
       "id": "4",
       "title": "DevOps Engineer",
       "status": "open",
       "priority": "high",
-      "dm_id": 2
+      "dm_id": 2,
+      "required_skills": [
+        "Docker",
+        "AWS",
+        "Kafka"
+      ]
     },
     {
       "title": "Python developer",
       "priority": "medium",
       "status": "closed",
       "dm_id": "11",
-      "id": "cpsXKj8Anxo"
+      "id": "cpsXKj8Anxo",
+      "required_skills": [
+        "Python",
+        "Django"
+      ]
+    },
+    {
+      "title": "Python developer",
+      "priority": "high",
+      "status": "open",
+      "dm_id": "11",
+      "id": "IwDDam_QxzI",
+      "required_skills": [
+        "Python",
+        "FastAPI",
+        "AWS"
+      ]
+    },
+    {
+      "title": "angular developer",
+      "priority": "medium",
+      "status": "open",
+      "dm_id": "11",
+      "id": "djQ93NzAing",
+      "required_skills": [
+        "Angular",
+        "TypeScript",
+        "NgRx"
+      ]
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"

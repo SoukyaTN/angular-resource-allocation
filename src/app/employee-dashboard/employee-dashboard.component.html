@@ -67,7 +67,7 @@
             <ng-container [ngSwitch]="employeeProfile()?.status">
               <span *ngSwitchCase="'allocated'">Currently working on a project</span>
               <span *ngSwitchCase="'bench'">On bench – ready for next project</span>
-              <span *ngSwitchDefault>Available for project assignment</span>
+              <span *ngSwitchDefault>On bench</span>
             </ng-container>
           </div>
         </div>
@@ -120,6 +120,59 @@
       </div>
       <div class="empty-skills" *ngIf="(employeeProfile()?.skills || []).length === 0">
         <p>No skills added yet. Click "Update Skills" to add your skills.</p>
+      </div>
+    </div>
+
+    <!-- Open Positions Card -->
+    <div class="card positions-card">
+      <div class="card-header">
+        <h2>📋 Open Positions</h2>
+        <span class="positions-count">{{ openPositions().length }} open</span>
+      </div>
+
+      <div class="positions-empty" *ngIf="openPositions().length === 0">
+        <span class="empty-icon">🎉</span>
+        <p>No open positions right now.</p>
+      </div>
+
+      <div class="positions-list" *ngIf="openPositions().length > 0">
+        <div class="position-row" *ngFor="let pos of openPositions()">
+          <div class="position-top">
+            <span class="position-title">{{ pos.title }}</span>
+            <span class="priority-tag"
+              [ngClass]="pos.priority === 'high' ? 'priority-high' : pos.priority === 'medium' ? 'priority-medium' : 'priority-low'">
+              {{ pos.priority }}
+            </span>
+          </div>
+
+          <!-- Required skills with matched/gap highlight -->
+          <div class="req-skills-row" *ngIf="(pos.required_skills || []).length > 0">
+            <span class="req-label">Required:</span>
+            <span *ngFor="let s of pos.required_skills"
+              class="req-chip"
+              [ngClass]="pos._gap.includes(s) ? 'chip-gap' : 'chip-match'">
+              {{ s }}
+              <span class="chip-icon">{{ pos._gap.includes(s) ? '✗' : '✓' }}</span>
+            </span>
+          </div>
+
+          <!-- Match bar -->
+          <div class="match-section">
+            <div class="match-bar-wrap">
+              <div class="match-bar">
+                <div class="match-fill" [ngClass]="getMatchClass(pos._pct)" [style.width.%]="pos._pct"></div>
+              </div>
+              <span class="match-label" [ngClass]="getMatchClass(pos._pct)">{{ pos._pct }}% match</span>
+            </div>
+            <div class="gap-section" *ngIf="pos._gap.length > 0">
+              <span class="gap-label">⚠️ Skill gap:</span>
+              <span class="gap-chip" *ngFor="let g of pos._gap">{{ g }}</span>
+            </div>
+            <div class="no-gap" *ngIf="pos._gap.length === 0 && pos._total > 0">
+              ✅ You match all required skills!
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 

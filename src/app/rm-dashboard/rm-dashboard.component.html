@@ -17,11 +17,11 @@
 
   <!-- Stats Row -->
   <div class="stats-row">
-    <div class="stat-card blue clickable" (click)="activeTab.set('bench')">
-      <div class="stat-icon">🎯</div>
+    <div class="stat-card blue clickable" (click)="activeTab.set('allocated')">
+      <div class="stat-icon">👥</div>
       <div class="stat-info">
-        <span class="stat-label">Available Engineers</span>
-        <span class="stat-value">{{ availableCount }}</span>
+        <span class="stat-label">Total Employees</span>
+        <span class="stat-value">{{ allocatedCount + benchCount }}</span>
       </div>
     </div>
     <div class="stat-card orange clickable" (click)="activeTab.set('bench')">
@@ -38,33 +38,96 @@
         <span class="stat-value">{{ allocatedCount }}</span>
       </div>
     </div>
-    <div class="stat-card indigo">
-      <div class="stat-icon">📁</div>
+    <div class="stat-card indigo clickable" (click)="activeTab.set('positions')">
+      <div class="stat-icon">📋</div>
       <div class="stat-info">
-        <span class="stat-label">Active Projects</span>
-        <span class="stat-value">{{ activeProjectCount }}</span>
+        <span class="stat-label">Open Positions</span>
+        <span class="stat-value">{{ openPositionCount }}</span>
       </div>
     </div>
   </div>
 
   <!-- Tab Bar -->
   <div class="tab-bar">
+    <button class="tab-btn" [class.active]="activeTab() === 'positions'" (click)="activeTab.set('positions')">
+      📋 Open Positions
+    </button>
     <button class="tab-btn" [class.active]="activeTab() === 'bench'" (click)="activeTab.set('bench')">
-      🧑‍💻 Bench & Available
+      🧑‍💻 Bench Engineers
     </button>
     <button class="tab-btn" [class.active]="activeTab() === 'allocated'" (click)="activeTab.set('allocated')">
       ✅ Allocated Engineers
     </button>
-    <button class="tab-btn" [class.active]="activeTab() === 'search'" (click)="activeTab.set('search')">
-      🔍 Search Engineers
-    </button>
   </div>
 
-  <!-- Bench & Available Tab -->
+  <!-- Open Positions Tab -->
+  <div class="tab-content" *ngIf="activeTab() === 'positions'">
+    <div class="table-toolbar">
+      <h2>🔓 Open Positions</h2>
+      <span class="record-count">{{ filteredPositions.length }} of {{ openPositions.length }}</span>
+    </div>
+    <div class="search-bar-row">
+      <input class="search-input" [(ngModel)]="positionSearch" placeholder="🔍 Search by title or skill..." />
+      <select class="search-select" [(ngModel)]="positionPriority">
+        <option value="all">All Priorities</option>
+        <option value="high">🔴 High</option>
+        <option value="medium">🟠 Medium</option>
+        <option value="low">🟢 Low</option>
+      </select>
+      <button class="btn-clear" *ngIf="positionSearch || positionPriority !== 'all'"
+        (click)="positionSearch = ''; positionPriority = 'all'">✕ Clear</button>
+    </div>
+    <div class="loading" *ngIf="isLoading()">Loading...</div>
+    <div class="table-wrap" *ngIf="!isLoading()">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Position</th>
+            <th>Required Skills</th>
+            <th>Priority</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let pos of filteredPositions; let i = index">
+            <td class="row-num">{{ i + 1 }}</td>
+            <td class="position-title">{{ pos.title }}</td>
+            <td>
+              <div class="skills-wrap">
+                <span class="skill-tag req-skill" *ngFor="let s of (pos.required_skills || [])">{{ s }}</span>
+                <span class="no-skills-note" *ngIf="!(pos.required_skills?.length)">—</span>
+              </div>
+            </td>
+            <td>
+              <span class="priority-badge"
+                    [ngClass]="pos.priority === 'high' ? 'priority-high' : pos.priority === 'medium' ? 'priority-medium' : 'priority-low'">
+                {{ pos.priority }}
+              </span>
+            </td>
+            <td><span class="badge badge-orange">{{ pos.status }}</span></td>
+            <td class="actions-cell">
+              <button class="btn-allocate" (click)="openPositionModal(pos)">👤 Allocate</button>
+            </td>
+          </tr>
+          <tr *ngIf="filteredPositions.length === 0">
+            <td colspan="6" class="empty-row">{{ positionSearch || positionPriority !== 'all' ? 'No positions match your search.' : 'No open positions at this time.' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Bench Tab -->
   <div class="tab-content" *ngIf="activeTab() === 'bench'">
     <div class="table-toolbar">
-      <h2>Bench &amp; Available Engineers</h2>
-      <span class="record-count">{{ benchAndAvailableEngineers.length }} engineers</span>
+      <h2>Bench Engineers</h2>
+      <span class="record-count">{{ filteredBench.length }} of {{ benchAndAvailableEngineers.length }}</span>
+    </div>
+    <div class="search-bar-row">
+      <input class="search-input" [(ngModel)]="benchSearch" placeholder="🔍 Search by name, skill or designation..." />
+      <button class="btn-clear" *ngIf="benchSearch" (click)="benchSearch = ''">✕ Clear</button>
     </div>
     <div class="loading" *ngIf="isLoading()">Loading...</div>
     <div class="table-wrap" *ngIf="!isLoading()">
@@ -81,7 +144,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let emp of benchAndAvailableEngineers; let i = index">
+          <tr *ngFor="let emp of filteredBench; let i = index">
             <td class="row-num">{{ i + 1 }}</td>
             <td class="name-cell">{{ emp.name }}</td>
             <td>{{ emp.designation }}</td>
@@ -94,11 +157,11 @@
             </td>
             <td>{{ emp.experience }} yr{{ emp.experience !== 1 ? 's' : '' }}</td>
             <td class="actions-cell">
-              <button class="btn-allocate" (click)="openAllocateModal(emp)">🚀 Allocate</button>
+              <span class="hint-text">Allocate via Open Positions tab</span>
             </td>
           </tr>
-          <tr *ngIf="benchAndAvailableEngineers.length === 0">
-            <td colspan="7" class="empty-row">No bench or available engineers.</td>
+          <tr *ngIf="filteredBench.length === 0">
+            <td colspan="7" class="empty-row">{{ benchSearch ? 'No engineers match your search.' : 'No bench engineers.' }}</td>
           </tr>
         </tbody>
       </table>
@@ -109,7 +172,11 @@
   <div class="tab-content" *ngIf="activeTab() === 'allocated'">
     <div class="table-toolbar">
       <h2>Allocated Engineers</h2>
-      <span class="record-count">{{ allocatedEngineers.length }} engineers</span>
+      <span class="record-count">{{ filteredAllocated.length }} of {{ allocatedEngineers.length }}</span>
+    </div>
+    <div class="search-bar-row">
+      <input class="search-input" [(ngModel)]="allocatedSearch" placeholder="🔍 Search by name, project or skill..." />
+      <button class="btn-clear" *ngIf="allocatedSearch" (click)="allocatedSearch = ''">✕ Clear</button>
     </div>
     <div class="loading" *ngIf="isLoading()">Loading...</div>
     <div class="table-wrap" *ngIf="!isLoading()">
@@ -127,7 +194,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let emp of allocatedEngineers; let i = index">
+          <tr *ngFor="let emp of filteredAllocated; let i = index">
             <td class="row-num">{{ i + 1 }}</td>
             <td class="name-cell">{{ emp.name }}</td>
             <td>{{ emp.designation }}</td>
@@ -153,119 +220,83 @@
     </div>
   </div>
 
-  <!-- Search Tab -->
-  <div class="tab-content" *ngIf="activeTab() === 'search'">
-    <div class="table-toolbar">
-      <h2>Search Engineers</h2>
-    </div>
-
-    <!-- Search Filters -->
-    <div class="search-filters">
-      <div class="filter-group">
-        <label>🔍 Search by Skill</label>
-        <input type="text" [(ngModel)]="searchSkill" placeholder="e.g. Angular, Python, AWS..." class="filter-input" />
-      </div>
-      <div class="filter-group">
-        <label>📅 Min Experience (yrs)</label>
-        <input type="number" [(ngModel)]="searchMinExp" placeholder="e.g. 3" min="0" class="filter-input" />
-      </div>
-      <div class="filter-group">
-        <label>⚡ Status</label>
-        <select [(ngModel)]="searchStatus" class="filter-select">
-          <option value="all">All Statuses</option>
-          <option value="available">Available</option>
-          <option value="bench">Bench</option>
-          <option value="allocated">Allocated</option>
-        </select>
-      </div>
-      <div class="filter-group filter-result">
-        <span class="result-count">{{ searchResults.length }} result{{ searchResults.length !== 1 ? 's' : '' }}</span>
-      </div>
-    </div>
-
-    <div class="loading" *ngIf="isLoading()">Loading...</div>
-    <div class="table-wrap" *ngIf="!isLoading()">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Name</th>
-            <th>Designation</th>
-            <th>Status</th>
-            <th>Project</th>
-            <th>Skills</th>
-            <th>Experience</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let emp of searchResults; let i = index">
-            <td class="row-num">{{ i + 1 }}</td>
-            <td class="name-cell">{{ emp.name }}</td>
-            <td>{{ emp.designation }}</td>
-            <td><span class="badge" [ngClass]="getStatusClass(emp.status)">{{ emp.status }}</span></td>
-            <td class="project-cell">{{ emp.project || '—' }}</td>
-            <td>
-              <div class="skills-wrap">
-                <span class="skill-tag" *ngFor="let s of (emp.skills || [])">{{ s }}</span>
-              </div>
-            </td>
-            <td>{{ emp.experience }} yr{{ emp.experience !== 1 ? 's' : '' }}</td>
-            <td class="actions-cell">
-              <button class="btn-allocate" *ngIf="emp.status !== 'allocated'" (click)="openAllocateModal(emp)">🚀 Allocate</button>
-              <button class="btn-release" *ngIf="emp.status === 'allocated'" (click)="releaseEngineer(emp)">🔓 Release</button>
-              <button class="btn-bench" *ngIf="emp.status === 'allocated'" (click)="moveToBench(emp)">📋 Bench</button>
-            </td>
-          </tr>
-          <tr *ngIf="searchResults.length === 0">
-            <td colspan="8" class="empty-row">No engineers match your search criteria.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
 </main>
 
-<!-- Allocate Engineer Modal -->
-<div class="modal-overlay" *ngIf="showAllocateModal()" (click)="showAllocateModal.set(false)">
-  <div class="modal" (click)="$event.stopPropagation()">
+<!-- Position Allocate Modal -->
+<div class="modal-overlay" *ngIf="showPositionAllocateModal()">
+  <div class="modal-box modal-wide">
     <div class="modal-header">
-      <h2>Allocate: {{ selectedEmployee()?.name }}</h2>
-      <button class="modal-close" (click)="showAllocateModal.set(false)">✕</button>
-    </div>
-    <form [formGroup]="allocateForm" (ngSubmit)="submitAllocate()" class="modal-form">
-      <div class="alert alert-success" *ngIf="successMessage()">✅ {{ successMessage() }}</div>
-      <div class="alert alert-error" *ngIf="errorMessage()">❌ {{ errorMessage() }}</div>
-
-      <div class="emp-info-card">
-        <div><strong>Name:</strong> {{ selectedEmployee()?.name }}</div>
-        <div><strong>Designation:</strong> {{ selectedEmployee()?.designation }}</div>
-        <div><strong>Experience:</strong> {{ selectedEmployee()?.experience }} yrs</div>
-        <div><strong>Current Status:</strong>
-          <span class="badge" [ngClass]="getStatusClass(selectedEmployee()?.status)">
-            {{ selectedEmployee()?.status }}
+      <div>
+        <h3>👤 Allocate to "{{ selectedPosition()?.title }}"</h3>
+        <div class="position-meta">
+          <span class="priority-badge"
+            [ngClass]="selectedPosition()?.priority === 'high' ? 'priority-high' : selectedPosition()?.priority === 'medium' ? 'priority-medium' : 'priority-low'">
+            {{ selectedPosition()?.priority }} priority
           </span>
+          <span class="req-skills-label">Required skills:</span>
+          <span class="skill-tag req-skill" *ngFor="let s of (selectedPosition()?.required_skills || [])">{{ s }}</span>
+          <span class="no-skills-note" *ngIf="!(selectedPosition()?.required_skills?.length)">No skills specified</span>
         </div>
       </div>
+      <button type="button" class="modal-close" (click)="showPositionAllocateModal.set(false)">✕</button>
+    </div>
 
-      <div class="form-group">
-        <label>Select Project *</label>
-        <select formControlName="project">
-          <option value="">-- Select a Project --</option>
-          <option *ngFor="let p of activeProjects" [value]="p.name">{{ p.name }}</option>
-        </select>
-        <span class="error-text" *ngIf="allocateForm.get('project')?.invalid && allocateForm.get('project')?.touched">
-          Please select a project
-        </span>
-      </div>
+    <div class="modal-content">
+      <div *ngIf="successMessage()" class="success-message">✅ {{ successMessage() }}</div>
+      <div *ngIf="errorMessage()" class="error-message">❌ {{ errorMessage() }}</div>
 
-      <div class="modal-footer">
-        <button type="button" class="btn-cancel" (click)="showAllocateModal.set(false)">Cancel</button>
-        <button type="submit" class="btn-submit" [disabled]="allocateForm.invalid || isSubmitting()">
-          {{ isSubmitting() ? 'Allocating...' : '🚀 Allocate Engineer' }}
-        </button>
-      </div>
-    </form>
+      <form [formGroup]="positionAllocateForm" (ngSubmit)="submitPositionAllocate()" *ngIf="!successMessage()">
+
+        <!-- Candidates table sorted by skill match -->
+        <div class="candidates-section">
+          <div class="candidates-header">
+            <span class="candidates-title">Bench Engineers</span>
+            <span class="candidates-sub">Sorted by skill match</span>
+          </div>
+
+          <div class="candidates-empty" *ngIf="positionCandidates().length === 0">
+            No bench engineers at the moment.
+          </div>
+
+          <div class="candidate-list" *ngIf="positionCandidates().length > 0">
+            <label class="candidate-card"
+              *ngFor="let emp of positionCandidates()"
+              [ngClass]="{ 'candidate-selected': positionAllocateForm.get('employee')?.value == emp.id }">
+              <input type="radio" formControlName="employee" [value]="emp.id" class="candidate-radio" />
+              <div class="candidate-info">
+                <div class="candidate-top">
+                  <span class="candidate-name">{{ emp.name }}</span>
+                  <span class="candidate-desig">{{ emp.designation }}</span>
+                  <span class="badge" [ngClass]="getStatusClass(emp.status)">{{ emp.status }}</span>
+                  <span class="exp-tag">{{ emp.experience }}yr exp</span>
+                </div>
+                <div class="candidate-skills">
+                  <span *ngFor="let s of (emp.skills || []).slice(0, 5)"
+                    class="skill-tag"
+                    [ngClass]="{ 'skill-matched': (emp._matchedSkills || []).includes(s.toLowerCase()) }">
+                    {{ s }}
+                  </span>
+                  <span class="skill-more" *ngIf="(emp.skills || []).length > 5">+{{ emp.skills.length - 5 }}</span>
+                </div>
+              </div>
+              <div class="match-pill" [ngClass]="getMatchClass(emp)">
+                <span class="match-num">{{ emp._matchCount }}/{{ emp._totalRequired }}</span>
+                <span class="match-pct">{{ getMatchPercent(emp) }}% match</span>
+              </div>
+            </label>
+          </div>
+          <span class="error-text" *ngIf="positionAllocateForm.get('employee')?.invalid && positionAllocateForm.get('employee')?.touched">
+            Please select an engineer
+          </span>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" (click)="showPositionAllocateModal.set(false)">Cancel</button>
+          <button type="submit" class="btn-submit" [disabled]="positionAllocateForm.invalid || isSubmitting()">
+            {{ isSubmitting() ? 'Allocating...' : '✅ Allocate Employee' }}
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
 </div>

@@ -10,7 +10,7 @@ export interface Employee {
   password: string;
   role: 'employee';
   designation: string;
-  status: 'allocated' | 'bench' | 'available';
+  status: 'allocated' | 'bench';
   project: string;
   skills: string[];
   experience: number;

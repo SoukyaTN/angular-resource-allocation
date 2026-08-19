@@ -21,6 +21,7 @@ export class EmployeeDashboardComponent implements OnInit {
   currentUser = this.authService.currentUser;
   employeeProfile = signal<any>(null);
   projectInfo = signal<any>(null);
+  openPositions = signal<any[]>([]);
   isLoading = signal(true);
 
   // Skills editing
@@ -33,7 +34,7 @@ export class EmployeeDashboardComponent implements OnInit {
 
   get statusClass(): string {
     const s = this.employeeProfile()?.status;
-    const m: Record<string, string> = { allocated: 'status-allocated', bench: 'status-bench', available: 'status-available' };
+    const m: Record<string, string> = { allocated: 'status-allocated', bench: 'status-bench' };
     return m[s] || '';
   }
 
@@ -53,8 +54,9 @@ export class EmployeeDashboardComponent implements OnInit {
 
     forkJoin({
       employees: this.userService.getEmployees(),
-      projects: this.userService.getProjects()
-    }).subscribe(({ employees, projects }) => {
+      projects: this.userService.getProjects(),
+      requests: this.userService.getRequests()
+    }).subscribe(({ employees, projects, requests }) => {
       const me = (employees as any[]).find(e => String(e.id) === String(userId));
       if (me) {
         this.employeeProfile.set(me);
@@ -62,6 +64,19 @@ export class EmployeeDashboardComponent implements OnInit {
           const proj = projects.find(p => p.name === me.project);
           this.projectInfo.set(proj || null);
         }
+        // Enrich open positions with skill match data
+        const mySkills: string[] = (me.skills || []).map((s: string) => s.toLowerCase());
+        const enriched = (requests as any[])
+          .filter(r => r.status === 'open')
+          .map(r => {
+            const required: string[] = (r.required_skills || []).map((s: string) => s.toLowerCase());
+            const matched = required.filter(req => mySkills.some(ms => ms.includes(req) || req.includes(ms)));
+            const gap = (r.required_skills || []).filter((_: string, i: number) => !matched.includes(required[i]));
+            const pct = required.length ? Math.round((matched.length / required.length) * 100) : 0;
+            return { ...r, _matched: matched.length, _total: required.length, _pct: pct, _gap: gap };
+          })
+          .sort((a, b) => b._pct - a._pct);
+        this.openPositions.set(enriched);
       }
       this.isLoading.set(false);
     });
@@ -103,6 +118,12 @@ export class EmployeeDashboardComponent implements OnInit {
         this.errorMessage.set('Failed to update skills.');
       }
     });
+  }
+
+  getMatchClass(pct: number): string {
+    if (pct >= 80) return 'match-high';
+    if (pct >= 40) return 'match-medium';
+    return 'match-low';
   }
 
   logout(): void {
